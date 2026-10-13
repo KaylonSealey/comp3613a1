@@ -367,7 +367,10 @@ note: Student verified year-plan filtering, removal, 16-credit validation, audit
 
 Phase 6. Public Render URL (not localhost). Markers open this to mark the three workflows.
 
-https://
+https://faststarter-3a8k.onrender.com
+
+
+https://faststarter-3a8k.onrender.com/health (Status: OK)
 
 ## Logins
 
