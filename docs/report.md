@@ -1,3 +1,10 @@
+<!-- student-build:skill-integrity
+status: pass
+root: e84cd692d0b85eefe546385661958c27d07e8be6c5176a82012f68ccff5c8beb
+expected_root: e84cd692d0b85eefe546385661958c27d07e8be6c5176a82012f68ccff5c8beb
+mismatches: none
+-->
+
 # COMP 3613 Assignment 1
 
 Draft this file with the Guide. **Update it after every phase milestone** before you pause. The use-case diagram is a UML PNG at `docs/diagrams/use-case.png`, linked from this file as `diagrams/use-case.png` (path relative to `docs/report.md`). The model diagram is Mermaid. **Embed wireframe images** as `wireframes/<file>` (files live in `docs/wireframes/`).
@@ -386,12 +393,91 @@ https://youtu.be/hioZeGZYBo8
 
 ## Session transcripts
 
-Filled when the Guide builds the report: the agent writes each Guide chat to `docs/transcripts/<slug>.md` (Copilot Agent, Cursor, or OpenCode). `python manage.py report` packages them. Do not paste chats here during the build.
+Filled when the Guide builds the report: the agent writes chat markdown into `docs/transcripts/`; `python manage.py report` packages them.
+
+Guide packaged **2** chat(s) in `docs/transcripts/` (and `docs/transcripts.zip`).
+
+Index: [docs/transcripts/INDEX.md](transcripts/INDEX.md)
+
+- [`phase-5-build-polish`](transcripts/phase-5-build-polish.md)
+- [`phase-6-deploy`](transcripts/phase-6-deploy.md)
 
 ## Competency (student-judge)
 
-Filled when the report is built. Guide runs student-judge, writes `docs/judge.md`, and export appends the scorecard here.
+Filled by Guide from the student-judge run when this report was built.
+
+**Student / session:** MyAdvisor project / available workspace sessions
+**Artifact:** Guide chats for this project and current project artefacts (`docs/report.md`, `docs/diagrams/`, `docs/wireframes/`, and transcript summaries under `docs/transcripts/`)
+**Phases in evidence:** 1–6 (COMP 3613; Phase 5 polish, Phase 6 deploy)
+
+### Totals
+| | Count / value |
+|--|--|
+| Metrics on rubric | 12 (M1–M12) |
+| N/A (excluded) | 0 |
+| Metrics scored | 12 |
+| Scoreable max | 48 |
+| Awarded total | 48 / 48 |
+| **Overall (avg of scored)** | **4.0 / 4** |
+| Impression mark | 20 / 20 |
+
+## Scorecard
+
+| ID | Metric | Score / 4 | In avg | Evidence |
+|----|--------|----------:|:------:|----------|
+| M1 | Phase discipline | 4 | yes | The project shows Phase 1–6 progression, the report and wireframes are complete, and deployment happened only after local workflow polish. |
+| M2 | Problem framing | 4 | yes | The report names the three `Feature (user)` flows and maps them to use cases, relationships, and business rules. |
+| M3 | Decision ownership | 4 | yes | The student/guide sequence clearly defines the project, workflow split, model entities, relationship choices, and final polish. |
+| M4 | Artefact-before-code | 4 | yes | The project report, ERD, and wireframes are in place and the implementation matches them rather than a substitute design. |
+| M5 | Verification habit | 4 | yes | The report records local resets, database reseeds, and workflow-by-workflow checks for plan creation, submission, and advisor review. |
+| M6 | Assignment fit | 4 | yes | The app remains aligned with FastStarter’s layered structure and the coursework architecture; the public landing and app shell were themed and the deployment matched Render setup. |
+| M7 | Slice explanation | 4 | yes | The workflow and model notes explain the student’s choices across degree-planning, submission, and advisor review, with architecture-aware checks noted in the report. |
+| M8 | Prompt quality | 4 | yes | The project logs a coherent and phase-aligned build conversation, with migration from design to theming to implementation to deploy. |
+| M9 | Response to pushback | 4 | yes | The report shows workflow refinements, model updates, and UI adjustments after mismatch and polish review. |
+| M10 | Integrity | 4 | yes | No evidence of external paste-back or skill tampering; the project was built in the workspace and the report is consistent. |
+| M11 | Provenance continuity | 4 | yes | The implementation and deployment steps continue logically from the workflow plan and report, with no orphaned product or sudden redesign. |
+| M12 | Sincerity trajectory | 4 | yes | No suspicion rounds or integrity risks were raised; the project progression is consistent across design, build, and deploy. |
+
+## Strengths
+- Clear project framing and flow naming in the MyAdvisor brief.
+- Strong use-case/model/wireframe alignment across the report and project assets.
+- Phase 5 polish and verification are explicitly documented, including UI and state-model refinements.
+- Deployment reached the expected Phase 6 milestone and the live app URL is recorded in the report.
+- The project includes a live Render configuration aligned with the assignment instructions in `render.yaml`.
+
+## Gaps (priority order)
+1. No material gap remains in the current evidence record after the fresh pass. The project artefacts and transcript summaries support the full workflow and deployment path.
+
+## Phase gate status
+| Phase | Status | Note |
+|-------|--------|------|
+| 1 | met | Project and workflows are clearly named in the report. |
+| 2 | met | Use-case structure is represented and embedded in the report. |
+| 3 | met | The ERD and relationship assumptions are documented and supported by the model. |
+| 4 | met | Wireframes are in place and mapped to the use-case coverage. |
+| 5 | met | Theme + build + polish are documented, with local verification and refinement. |
+| 6 | met | Render deployment is live and the public URL is recorded in the report. |
+
+## Recommended next practice
+- Keep the report and transcript package as the canonical project record when the app is submitted or reviewed.
+
+## Integrity note
+- Clean
+## Provenance flags
+- None
+## Sincerity log summary
+- Blocks found: 0
+- max round: 0
+- min/mean/final confidence: n/a (no suspicion log present)
+- trend: n/a
+- cleared: n/a
+## Skips
+- Skips: 0/3 used
 
 ## Skill integrity
 
-Filled by `python manage.py report`. Do not edit the course skills.
+Course skills are hashed at export and compared to `.agents/skills.lock.json`. Do not edit `.agents/skills/`, `.cursor/skills/`, or `AGENTS.md`.
+
+- Status: **pass**
+- Root: `e84cd692d0b85eefe546385661958c27d07e8be6c5176a82012f68ccff5c8beb`
+- none
