@@ -1,0 +1,57 @@
+{
+  "system": "MyAdvisor",
+  "actors": [
+    {"name": "Student", "side": "left"},
+    {"name": "Advisor", "side": "right"}
+  ],
+  "use_cases": [
+    {
+      "name": "Track Degree Audit & Plan Semester Courses",
+      "actors": ["Student"],
+      "includes": ["View Degree Audit", "View Course Catalog"],
+      "extends": ["Save Draft Plan"]
+    },
+    {
+      "name": "Save Draft Plan",
+      "actors": ["Student"],
+      "extends": ["Track Degree Audit & Plan Semester Courses"]
+    },
+    {
+      "name": "View Degree Audit",
+      "actors": ["Student", "Advisor"]
+    },
+    {
+      "name": "View Course Catalog",
+      "actors": ["Student", "Advisor"]
+    },
+    {
+      "name": "Submit Course Selection Plan for Approval",
+      "actors": ["Student"],
+      "includes": ["Save Draft Plan", "Validate Plan Constraints", "View Degree Audit", "View Course Catalog"]
+    },
+    {
+      "name": "Validate Plan Constraints",
+      "actors": ["Student"]
+    },
+    {
+      "name": "Review and Approve Course Selection Plan",
+      "actors": ["Advisor"],
+      "includes": ["Fetch Student Progress History", "View Degree Audit", "View Course Catalog"],
+      "extends": ["Add Advising Notes", "Request Plan Revisions"]
+    },
+    {
+      "name": "Fetch Student Progress History",
+      "actors": ["Advisor"]
+    },
+    {
+      "name": "Add Advising Notes",
+      "actors": ["Advisor"],
+      "extends": ["Review and Approve Course Selection Plan"]
+    },
+    {
+      "name": "Request Plan Revisions",
+      "actors": ["Advisor"],
+      "extends": ["Review and Approve Course Selection Plan"]
+    }
+  ]
+}

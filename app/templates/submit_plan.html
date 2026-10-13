@@ -1,0 +1,123 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Submit Plan for Approval · MyAdvisor{% endblock %}
+{% block subpage_content %}
+<main class="submission-page">
+  <section class="submission-panel">
+    <header class="submission-header">
+      <div>
+        <p class="submission-kicker">MyAdvisor · {{ student.first_name }} {{ student.last_name }}</p>
+        <h1>Submit Plan for Approval</h1>
+        <p class="submission-intro">
+          Review your course selection for {{ academic_term }} before submitting it to your advisor.
+        </p>
+      </div>
+      <span class="submission-status status-{{ plan.status|lower|replace(' ', '-') }}">{{ plan.status }}</span>
+    </header>
+
+    <section class="submission-summary" aria-labelledby="submission-summary-heading">
+      <h2 id="submission-summary-heading">Plan Summary · {{ academic_term }}</h2>
+      {% if plan_courses %}
+      <div class="submission-table-wrap">
+        <table class="submission-table">
+          <thead>
+            <tr>
+              <th scope="col">Course</th>
+              <th scope="col">Course Title</th>
+              <th scope="col" class="submission-credit">Credits</th>
+            </tr>
+          </thead>
+          {% for placement, courses in plan_course_groups %}
+          <tbody class="submission-semester-group">
+            <tr class="submission-semester-heading">
+              <th scope="rowgroup" colspan="3">{{ placement }}</th>
+            </tr>
+            {% for plan_course, course in courses %}
+            <tr>
+              <td><strong>{{ course.code }}</strong></td>
+              <td>{{ course.title }}</td>
+              <td class="submission-credit">{{ course.credits }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          {% endfor %}
+          <tfoot>
+            <tr>
+              <th colspan="2" scope="row">Total Credits</th>
+              <td class="submission-credit">{{ total_credits }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      {% else %}
+      <p class="submission-empty">No courses have been added to this plan yet.</p>
+      {% endif %}
+    </section>
+
+    {% if plan.status in ["Draft", "Revision Requested"] %}
+    {% if plan.advisor_notes %}
+    <section class="submission-feedback" aria-labelledby="advisor-feedback-heading">
+      <h2 id="advisor-feedback-heading">Advisor Feedback</h2>
+      <p>{{ plan.advisor_notes }}</p>
+    </section>
+    {% endif %}
+    <form class="submission-form" action="/app/save-draft" method="post">
+      <input type="hidden" name="academic_term" value="{{ academic_term }}">
+      <label for="advisor-notes">Comments for Advisor <span>(optional)</span></label>
+      <textarea
+        id="advisor-notes"
+        name="notes"
+        rows="4"
+        placeholder="Add any comments or context for your advisor..."
+      >{{ plan.notes or "" }}</textarea>
+      <div class="submission-actions">
+        <a class="submission-button submission-button-secondary" href="/app?academic_term={{ academic_term }}">
+          Back to Planner
+        </a>
+        <button class="submission-button submission-button-secondary" type="submit">
+          Save Draft
+        </button>
+        <button
+          class="submission-button submission-button-primary"
+          type="submit"
+          formaction="/app/submit"
+          {% if not plan_courses %}disabled{% endif %}
+        >
+          Submit for Approval
+        </button>
+      </div>
+      {% if not plan_courses %}
+      <p class="submission-hint">Add at least one course in the planner before submitting.</p>
+      {% endif %}
+    </form>
+    {% else %}
+    <section class="submission-locked" aria-live="polite">
+      <h2>Plan locked</h2>
+      <p>
+        {% if plan.status == "Pending Review" %}
+        Your advisor is reviewing this submitted plan. It cannot be edited while the review is pending.
+        {% elif plan.status == "Approved" %}
+        Your advisor approved this plan. It is now locked.
+        {% else %}
+        This plan is {{ plan.status|lower }} and cannot be edited.
+        {% endif %}
+      </p>
+      {% if plan.notes %}
+      <div class="submission-saved-notes">
+        <strong>Your Comments for Advisor</strong>
+        <p>{{ plan.notes }}</p>
+      </div>
+      {% endif %}
+      {% if plan.advisor_notes %}
+      <div class="submission-feedback">
+        <strong>Advisor Feedback</strong>
+        <p>{{ plan.advisor_notes }}</p>
+      </div>
+      {% endif %}
+      <a class="submission-button submission-button-secondary" href="/app?academic_term={{ academic_term }}">
+        Back to Planner
+      </a>
+    </section>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Advisor Review Queue · MyAdvisor{% endblock %}
+{% block subpage_content %}
+<main class="advisor-page">
+  <section class="advisor-panel">
+    <header class="advisor-page-header">
+      <div>
+        <p class="submission-kicker">{{ advisor.department }} · Advisor Portal</p>
+        <h1>Assigned Plan Reviews</h1>
+        <p class="submission-intro">Review pending course plans assigned to you.</p>
+      </div>
+      <span class="submission-status status-pending-review">{{ plans|length }} pending</span>
+    </header>
+
+    {% if plans %}
+    <div class="submission-table-wrap">
+      <table class="submission-table">
+        <thead>
+          <tr>
+            <th scope="col">Student</th>
+            <th scope="col">Student ID</th>
+            <th scope="col">Academic Year</th>
+            <th scope="col">Submitted</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for plan, student in plans %}
+          <tr>
+            <td><strong>{{ student.first_name }} {{ student.last_name }}</strong></td>
+            <td>{{ student.student_id }}</td>
+            <td>{{ plan.academic_term }}</td>
+            <td>
+              {% if plan.submitted_at %}
+              {{ plan.submitted_at.strftime("%b %d, %Y %I:%M %p") }}
+              {% else %}
+              —
+              {% endif %}
+            </td>
+            <td>
+              <a class="submission-button submission-button-primary" href="/advisor/plans/{{ plan.id }}">
+                Review
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="submission-empty">There are no pending plans assigned to you.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

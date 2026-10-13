@@ -1,9 +1,359 @@
-{% extends "authenticated-base.html" %}
-{% block title %}Home{% endblock %}
+{% extends "authenticated-base.html" %} {% block title %}MyAdvisor Degree Audit
+&amp; Planner{% endblock %} {% block subpage_content %}
+<main
+  class="app-dashboard"
+  id="degree-planner"
+  data-academic-term="{{ academic_term }}"
+>
+  <section class="app-panel">
+    <div class="app-panel-header">
+      <div>
+        <h1>Degree Audit &amp; Course Planner</h1>
+        <p class="text-muted mb-0">
+          {{ student.first_name }} {{ student.last_name }} · {{ academic_term }}
+        </p>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center">
+        <span class="status-pill neutral">Degree audit and plan</span>
+        <a
+          href="/app/submit?academic_term={{ academic_term }}"
+          class="btn btn-primary btn-sm"
+          style="
+            text-decoration: none;
+            padding: 6px 12px;
+            font-weight: 500;
+            border-radius: 4px;
+          "
+        >
+          Proceed to Next Step &rarr;
+        </a>
+      </div>
+    </div>
 
-{% block subpage_content %}
-<div class="container-fluid py-2">
-  <h1 class="h4 mb-2">Home</h1>
-  <p class="text-muted mb-0">Workflow screens replace this shell in Phase 5 implement.</p>
-</div>
+    <div class="degree-layout">
+      <!-- Degree Audit Checklist Section -->
+      <section class="audit-box" aria-labelledby="audit-heading">
+        <div class="section-heading">
+          <h2 id="audit-heading">Degree Audit Checklist</h2>
+          <span
+            >{{ audit.total_completed_credits }}/{{ audit.total_required_credits
+            }} credits</span
+          >
+        </div>
+
+        {% if audit.categories %}
+        <div class="audit-list">
+          {% for category in audit.categories %}
+          <section class="audit-category">
+            <div class="audit-category-heading">
+              <h3>{{ category.name }}</h3>
+              <span
+                >{{ category.completed_credits }}/{{ category.required_credits
+                }} credits</span
+              >
+            </div>
+            {% for item in category.courses %}
+            <div class="audit-row">
+              <input
+                type="checkbox"
+                disabled
+                {%
+                if
+                item.completed
+                %}checked{%
+                endif
+                %}
+                aria-label="{{ 'Completed' if item.completed else 'Not completed' }}"
+              />
+              <span class="label"
+                >{{ item.course.code }} · {{ item.course.title }}</span
+              >
+              <span class="met">{{ item.credits }} cr</span>
+            </div>
+            {% endfor %}
+          </section>
+          {% endfor %}
+        </div>
+        <div class="degree-progress">
+          <div class="degree-progress-label">
+            <strong>Total Progress</strong>
+            <span
+              >{{ audit.total_completed_credits }}/{{
+              audit.total_required_credits }} credits · {{
+              audit.progress_percent }}%</span
+            >
+          </div>
+          <progress
+            value="{{ audit.progress_percent }}"
+            max="100"
+            aria-label="Degree progress"
+          ></progress>
+        </div>
+        {% else %}
+        <p class="empty-state">
+          No degree requirements are configured for this program yet.
+        </p>
+        {% endif %}
+      </section>
+
+      <!-- Semester Scheduler Grid Section -->
+      <section class="scheduler-box" aria-labelledby="planner-heading">
+        <div class="scheduler-toolbar">
+          <div>
+            <h2 id="planner-heading">Plan Semester</h2>
+            <span class="text-muted"
+              >Select a year and term before adding a course.</span
+            >
+          </div>
+          <div class="planner-controls">
+            <label class="academic-term-control">
+              <span class="visually-hidden">Academic year</span>
+              <select id="academic-term" aria-label="Select academic year">
+                <option value="2026/27" {% if academic_term == '2026/27' %}selected{% endif %}>2026/27</option>
+                <option value="2027/28" {% if academic_term == '2027/28' %}selected{% endif %}>2027/28</option>
+              </select>
+            </label>
+            <label class="plan-length-control">
+              <span class="visually-hidden">Plan length</span>
+              <select id="plan-length" aria-label="Select plan length">
+                <option value="1" {% if plan_length == 1 %}selected{% endif %}>1-year plan</option>
+                <option value="2" {% if plan_length == 2 %}selected{% endif %}>2-year plan</option>
+                <option value="3" {% if plan_length == 3 %}selected{% endif %}>3-year plan</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="planner-grid-scroll">
+          <div class="planner-grid">
+            <div class="planner-grid-corner"></div>
+            {% for term in planner_terms %}
+            <h3 class="planner-term-heading">{{ term }}</h3>
+            {% endfor %} {% for year in planner_years %}
+            <h3 class="planner-year-heading">{{ year }}</h3>
+            {% for term in planner_terms %} {% set placement = year ~ ' - ' ~ term
+            %}
+            {% set cell = namespace(count=0, credits=0) %}
+            {% for plan_course, course in plan_courses %} {% if
+            plan_course.placement == placement %} {% set cell.count = cell.count + 1
+            %} {% set cell.credits = cell.credits + course.credits %} {% endif %}
+            {% endfor %}
+
+            <section class="planner-cell">
+              <div class="planner-cell-heading">
+                <span>{{ cell.count }} course(s)</span>
+                <span>{{ cell.credits }}/16 credits</span>
+              </div>
+              <div class="planner-course-list">
+                {% for plan_course, course in plan_courses %} {% if
+                plan_course.placement == placement %}
+                <div class="planner-course-chip">
+                  <strong>{{ course.code }}</strong>
+                  <span>{{ course.title }} · {{ course.credits }} cr</span>
+                  <button
+                    class="course-remove-button"
+                    type="button"
+                    data-plan-course-id="{{ plan_course.id }}"
+                    aria-label="Remove {{ course.code }} from {{ placement }}"
+                  >
+                    Remove
+                  </button>
+                </div>
+                {% endif %} {% endfor %}
+              </div>
+              <button
+                class="slot-select"
+                type="button"
+                data-placement="{{ placement }}"
+                aria-pressed="false"
+              >
+                {% if cell.count %}Add another course{% else %}Select empty slot{% endif %}
+              </button>
+            </section>
+            {% endfor %} {% endfor %}
+          </div>
+        </div>
+        <p
+          id="planner-destination"
+          class="selection-message"
+          aria-live="polite"
+        >
+          Choose a planner slot to set the destination for your next course.
+        </p>
+      </section>
+    </div>
+
+    <!-- Course Catalog Search Section -->
+    <section class="catalog-panel" aria-labelledby="catalog-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="catalog-heading">Search Course Catalog</h2>
+          <p class="text-muted mb-0">
+            Find a course, select a planner slot, then add it to your plan.
+          </p>
+        </div>
+      </div>
+      <form id="catalog-search-form" class="catalog-search-form">
+        <label class="visually-hidden" for="catalog-query"
+          >Search by faculty, subject, course code or keyword</label
+        >
+        <input
+          id="catalog-query"
+          name="query"
+          type="search"
+          placeholder="Search by faculty, subject, course code or keyword"
+        />
+        <label class="visually-hidden" for="catalog-faculty"
+          >Filter by faculty</label
+        >
+        <select id="catalog-faculty" name="faculty">
+          <option value="">All faculties</option>
+          {% for faculty in faculties %}
+          <option value="{{ faculty }}">{{ faculty }}</option>
+          {% endfor %}
+        </select>
+        <button class="filter-button" type="submit">Search</button>
+      </form>
+      <p id="catalog-message" class="selection-message" aria-live="polite">
+        Search to view available courses.
+      </p>
+      <div id="catalog-results" class="catalog-results"></div>
+    </section>
+  </section>
+</main>
+{% endblock %} {% block subpage_scripts %}
+<script>
+  (() => {
+    const searchForm = document.getElementById("catalog-search-form");
+    const results = document.getElementById("catalog-results");
+    const searchMessage = document.getElementById("catalog-message");
+    const destinationMessage = document.getElementById("planner-destination");
+    const termSelect = document.getElementById("academic-term");
+    const planLengthSelect = document.getElementById("plan-length");
+    let selectedPlacement = "";
+
+    const updatePlannerView = () => {
+      const params = new URLSearchParams(window.location.search);
+      params.set("academic_term", termSelect.value);
+      params.set("plan_length", planLengthSelect.value);
+      window.location.search = params.toString();
+    };
+
+    termSelect.addEventListener("change", updatePlannerView);
+    planLengthSelect.addEventListener("change", updatePlannerView);
+
+    document.querySelectorAll(".slot-select").forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedPlacement = button.dataset.placement || "";
+        document.querySelectorAll(".slot-select").forEach((slot) => {
+          slot.setAttribute("aria-pressed", String(slot === button));
+          slot
+            .closest(".planner-cell")
+            .classList.toggle("selected", slot === button);
+        });
+        destinationMessage.textContent = `Selected destination: ${selectedPlacement}`;
+        results.querySelectorAll(".course-add-button").forEach((addButton) => {
+          addButton.disabled = !selectedPlacement;
+        });
+      });
+    });
+
+    document.querySelectorAll(".course-remove-button").forEach((button) => {
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          const params = new URLSearchParams({ academic_term: termSelect.value });
+          const response = await fetch(
+            `/app/plans/courses/${button.dataset.planCourseId}?${params}`,
+            { method: "DELETE" },
+          );
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.detail || "The course could not be removed.");
+          }
+          window.location.reload();
+        } catch (error) {
+          searchMessage.textContent = error.message;
+          button.disabled = false;
+        }
+      });
+    });
+
+    searchForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      searchMessage.textContent = "Searching the course catalog…";
+      results.replaceChildren();
+
+      const params = new URLSearchParams({
+        query: document.getElementById("catalog-query").value,
+        faculty: document.getElementById("catalog-faculty").value,
+      });
+
+      try {
+        const response = await fetch(`/app/catalog/search?${params}`);
+        if (!response.ok) {
+          throw new Error("The catalog search could not be completed.");
+        }
+        const data = await response.json();
+        if (!data.courses.length) {
+          searchMessage.textContent = "No courses matched that search.";
+          return;
+        }
+
+        searchMessage.textContent = `${data.courses.length} course(s) found.`;
+        data.courses.forEach((course) => {
+          const card = document.createElement("article");
+          card.className = "catalog-course-card";
+
+          const details = document.createElement("div");
+          const title = document.createElement("strong");
+          title.textContent = `${course.code} · ${course.title}`;
+          const metadata = document.createElement("p");
+          metadata.textContent = `${course.faculty} · ${course.credits} credits · ${course.level}`;
+          const description = document.createElement("p");
+          description.textContent = course.description;
+          details.append(title, metadata, description);
+
+          const addButton = document.createElement("button");
+          addButton.className = "course-add-button";
+          addButton.type = "button";
+          addButton.textContent = "Add to plan";
+          addButton.disabled = !selectedPlacement;
+          addButton.addEventListener("click", async () => {
+            addButton.disabled = true;
+            addButton.textContent = "Adding…";
+            try {
+              const addResponse = await fetch("/app/plans/courses", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  course_id: course.id,
+                  academic_term: termSelect.value,
+                  placement: selectedPlacement,
+                  plan_length: Number(planLengthSelect.value),
+                }),
+              });
+              const addResult = await addResponse.json();
+              if (!addResponse.ok) {
+                throw new Error(
+                  addResult.detail || "The course could not be added.",
+                );
+              }
+              window.location.reload();
+            } catch (error) {
+              searchMessage.textContent = error.message;
+              addButton.disabled = !selectedPlacement;
+              addButton.textContent = "Add to plan";
+            }
+          });
+
+          card.append(details, addButton);
+          results.append(card);
+        });
+      } catch (error) {
+        searchMessage.textContent = error.message;
+      }
+    });
+  })();
+</script>
 {% endblock %}

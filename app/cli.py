@@ -47,15 +47,22 @@ def cmd_init(args: argparse.Namespace) -> None:
 
 
 def cmd_seed(args: argparse.Namespace) -> None:
-    """Insert demo users.
+    """Insert demo users, a catalog, and starter audit data.
 
     bob / bobpass       (regular_user)
     admin / adminpass   (admin)
     """
     from app.database import ensure_db_and_tables, get_cli_session
+    from app.models.advisor import Advisor
+    from app.models.completed_course import CompletedCourse
+    from app.models.course import Course
+    from app.models.degree_program import DegreeProgram
+    from app.models.degree_requirement import DegreeRequirement
+    from app.models.student import Student
     from app.repositories.user import UserRepository
     from app.schemas.user import AdminCreate, RegularUserCreate
     from app.utilities.security import encrypt_password
+    from sqlmodel import select
 
     _ensure_models_loaded()
     ensure_db_and_tables()
@@ -63,6 +70,7 @@ def cmd_seed(args: argparse.Namespace) -> None:
     demo_users = [
         ("bob", "bob@example.com", "bobpass", "regular_user"),
         ("admin", "admin@example.com", "adminpass", "admin"),
+        ("advisor", "advisor@example.com", "advisorpass", "advisor"),
     ]
 
     created = 0
@@ -86,8 +94,130 @@ def cmd_seed(args: argparse.Namespace) -> None:
             print(f"  create {username} ({role})")
             created += 1
 
+    demo_courses = [
+        ("COMP1001", "Introduction to Programming", "Computing", "Core"),
+        ("COMP1002", "Data Fundamentals", "Computing", "Core"),
+        ("COMP2001", "Algorithms", "Computing", "Major"),
+        ("COMP2002", "Software Design", "Computing", "Major"),
+        ("MATH1001", "Calculus I", "Mathematics", "Math"),
+        ("SCI1001", "Science Foundations", "Science", "Science"),
+        ("WRIT1001", "Technical Writing", "General Education", "Technical Writing"),
+        ("ELEC1001", "Humanities Elective", "Arts", "Free Electives"),
+        ("ELEC1002", "Social Science Elective", "Social Sciences", "Free Electives"),
+    ]
+    with get_cli_session() as session:
+        program = session.exec(
+            select(DegreeProgram).where(DegreeProgram.code == "BSC-CS")
+        ).one_or_none()
+        if program is None:
+            program = DegreeProgram(
+                name="Bachelor of Science in Computer Science",
+                code="BSC-CS",
+                required_credits=120,
+                catalog_year="2026/27",
+            )
+            session.add(program)
+            session.flush()
+
+        courses_by_code: dict[str, Course] = {}
+        for code, title, faculty, _ in demo_courses:
+            course = session.exec(
+                select(Course).where(Course.code == code)
+            ).one_or_none()
+            if course is None:
+                course = Course(
+                    code=code,
+                    title=title,
+                    faculty=faculty,
+                    credits=3,
+                    level="Undergraduate",
+                    description=f"Demo catalog entry for {title}.",
+                )
+                session.add(course)
+                session.flush()
+            courses_by_code[code] = course
+
+        bob = UserRepository(session).get_by_username("bob")
+        advisor_user = UserRepository(session).get_by_username("advisor")
+        if bob is not None:
+            student = session.exec(
+                select(Student).where(Student.user_id == bob.id)
+            ).one_or_none()
+            if student is None:
+                student = Student(
+                    user_id=bob.id,
+                    student_id="1002450678",
+                    first_name="John",
+                    last_name="Doe",
+                    email=bob.email,
+                    degree_program_id=program.id,
+                )
+                session.add(student)
+                session.flush()
+
+            if advisor_user is not None:
+                advisor = session.exec(
+                    select(Advisor).where(Advisor.user_id == advisor_user.id)
+                ).one_or_none()
+                if advisor is None:
+                    advisor = Advisor(
+                        user_id=advisor_user.id,
+                        first_name="Demo",
+                        last_name="Advisor",
+                        email=advisor_user.email,
+                        department="Computing",
+                    )
+                    session.add(advisor)
+                    session.flush()
+                student.advisor_id = advisor.id
+                session.add(student)
+
+            completed_codes = {
+                "COMP1001",
+                "COMP2001",
+                "MATH1001",
+                "SCI1001",
+                "ELEC1001",
+            }
+            for code, _, _, requirement_type in demo_courses:
+                course = courses_by_code[code]
+                requirement = session.exec(
+                    select(DegreeRequirement).where(
+                        DegreeRequirement.degree_program_id == program.id,
+                        DegreeRequirement.course_id == course.id,
+                    )
+                ).one_or_none()
+                if requirement is None:
+                    session.add(
+                        DegreeRequirement(
+                            degree_program_id=program.id,
+                            course_id=course.id,
+                            requirement_type=requirement_type,
+                            credits=course.credits,
+                        )
+                    )
+                if code in completed_codes:
+                    completed = session.exec(
+                        select(CompletedCourse).where(
+                            CompletedCourse.student_id == student.id,
+                            CompletedCourse.course_id == course.id,
+                        )
+                    ).one_or_none()
+                    if completed is None:
+                        session.add(
+                            CompletedCourse(
+                                student_id=student.id,
+                                course_id=course.id,
+                                grade="A",
+                                term_completed="2025/26",
+                                transferred=False,
+                            )
+                        )
+        session.commit()
+
     print(f"Seed done — created {created}, skipped {skipped}.")
-    print("Login with bob/bobpass or admin/adminpass")
+    print("Demo degree program and course catalog are ready.")
+    print("Login with bob/bobpass, advisor/advisorpass, or admin/adminpass")
 
 
 def cmd_run(args: argparse.Namespace) -> None:

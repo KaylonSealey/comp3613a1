@@ -1,0 +1,184 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Review Student Plan · MyAdvisor{% endblock %}
+{% block subpage_content %}
+<main class="advisor-page">
+  <a class="advisor-back-link" href="{{ url_for('advisor_home_view') }}">← Back to assigned plans</a>
+  <section class="advisor-panel">
+    <header class="advisor-page-header">
+      <div>
+        <p class="submission-kicker">Student Profile &amp; Submission</p>
+        <h1>{{ student.first_name }} {{ student.last_name }}</h1>
+        <p class="submission-intro">{{ student.email }} · Student ID {{ student.student_id }}</p>
+      </div>
+      <span class="submission-status status-{{ plan.status|lower|replace(' ', '-') }}">{{ plan.status }}</span>
+    </header>
+
+    <div class="advisor-profile-grid">
+      <section class="advisor-info-card">
+        <h2>Student Profile</h2>
+        <dl>
+          <dt>Email</dt>
+          <dd>{{ student.email }}</dd>
+          <dt>Student ID</dt>
+          <dd>{{ student.student_id }}</dd>
+          <dt>Degree Program</dt>
+          <dd>{{ degree_program.name }}</dd>
+        </dl>
+      </section>
+      <section class="advisor-info-card">
+        <h2>Submission Details</h2>
+        <dl>
+          <dt>Academic Year</dt>
+          <dd>{{ plan.academic_term }}</dd>
+          <dt>Submitted</dt>
+          <dd>
+            {% if plan.submitted_at %}
+            {{ plan.submitted_at.strftime("%B %d, %Y at %I:%M %p") }}
+            {% else %}
+            Not submitted
+            {% endif %}
+          </dd>
+          {% if plan.approved_at %}
+          <dt>Decision recorded</dt>
+          <dd>{{ plan.approved_at.strftime("%B %d, %Y at %I:%M %p") }}</dd>
+          {% endif %}
+        </dl>
+      </section>
+    </div>
+
+    {% if plan.notes %}
+    <section class="advisor-student-notes">
+      <h2>Student Comments</h2>
+      <p>{{ plan.notes }}</p>
+    </section>
+    {% endif %}
+
+    <div class="advisor-review-grid">
+      <section class="advisor-review-card" aria-labelledby="proposed-plan-heading">
+        <h2 id="proposed-plan-heading">Student's Proposed Plan</h2>
+        {% if plan_courses %}
+        <div class="submission-table-wrap">
+          <table class="submission-table">
+            <thead>
+              <tr>
+                <th scope="col">Course</th>
+                <th scope="col">Title</th>
+                <th scope="col">Year and Term</th>
+                <th scope="col" class="submission-credit">Credits</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for plan_course, course in plan_courses %}
+              <tr>
+                <td><strong>{{ course.code }}</strong></td>
+                <td>{{ course.title }}</td>
+                <td>{{ plan_course.placement }}</td>
+                <td class="submission-credit">{{ course.credits }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="3" scope="row">Total Credits</th>
+                <td class="submission-credit">{{ total_plan_credits }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        {% else %}
+        <p class="submission-empty">No courses are included in this plan.</p>
+        {% endif %}
+      </section>
+
+      <section class="advisor-review-card" aria-labelledby="degree-audit-heading">
+        <h2 id="degree-audit-heading">Degree Audit Verification</h2>
+        <p class="advisor-audit-context">
+          Completed coursework is shown here; proposed courses remain separate until completed.
+        </p>
+        {% if audit.categories %}
+        <div class="advisor-audit-list">
+          {% for category in audit.categories %}
+          <div class="advisor-audit-row">
+            <span>{{ category.name }}</span>
+            <span>{{ category.completed_credits }}/{{ category.required_credits }} credits</span>
+            <strong class="{{ 'audit-satisfied' if category.completed_credits >= category.required_credits else 'audit-incomplete' }}">
+              {{ "Satisfied" if category.completed_credits >= category.required_credits else "In progress" }}
+            </strong>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="advisor-audit-total">
+          <strong>Completed requirements</strong>
+          <span>{{ audit.total_completed_credits }}/{{ audit.total_required_credits }} credits · {{ audit.progress_percent }}%</span>
+        </div>
+        {% else %}
+        <p class="submission-empty">No degree requirements are configured for this program.</p>
+        {% endif %}
+      </section>
+    </div>
+
+    {% if plan.advisor_notes %}
+    <section class="advisor-feedback">
+      <h2>Previous Advisor Feedback</h2>
+      <p>{{ plan.advisor_notes }}</p>
+    </section>
+    {% endif %}
+
+    {% if plan.status == "Pending Review" %}
+    <section class="advisor-decision">
+      <h2>Advisor Decision</h2>
+      <form
+        id="advisor-decision-form"
+        action="/advisor/plans/{{ plan.id }}/decision"
+        method="post"
+      >
+        <fieldset class="advisor-decision-options">
+          <legend class="visually-hidden">Choose a decision</legend>
+          <label class="advisor-decision-option approve-option">
+            <input type="radio" name="decision" value="approve" required>
+            <span>Approve Plan</span>
+          </label>
+          <label class="advisor-decision-option revision-option">
+            <input type="radio" name="decision" value="request_revisions" required>
+            <span>Request Revisions</span>
+          </label>
+        </fieldset>
+        <label for="advisor-decision-notes">
+          Advising Notes <span>(required when requesting revisions)</span>
+        </label>
+        <textarea
+          id="advisor-decision-notes"
+          name="notes"
+          rows="5"
+          placeholder="Provide feedback or instructions for the student..."
+        ></textarea>
+        <div class="advisor-decision-actions">
+          <button class="submission-button submission-button-primary" type="submit">
+            Submit Decision
+          </button>
+        </div>
+      </form>
+    </section>
+    {% else %}
+    <section class="submission-locked">
+      <h2>Decision recorded</h2>
+      <p>This plan is {{ plan.status|lower }} and is not awaiting a decision.</p>
+    </section>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}
+{% block subpage_scripts %}
+<script>
+  const decisionForm = document.getElementById("advisor-decision-form");
+  if (decisionForm) {
+    const notesField = document.getElementById("advisor-decision-notes");
+    const revisionChoice = decisionForm.querySelector(
+      'input[name="decision"][value="request_revisions"]'
+    );
+    decisionForm.addEventListener("change", () => {
+      notesField.required = revisionChoice.checked;
+    });
+  }
+</script>
+{% endblock %}

@@ -1,13 +1,10 @@
 {% extends "base.html" %}
-{% block title %}FastStarter{% endblock %}
+{% block title %}MyAdvisor{% endblock %}
 
 {% block content %}
 <div class="landing">
-  <div class="landing-orb" aria-hidden="true"></div>
-  <div class="landing-orb landing-orb-2" aria-hidden="true"></div>
-
   <header class="landing-nav">
-    <a class="brand-wordmark" href="{{ url_for('index_view') }}">FastStarter</a>
+    <a class="brand-wordmark" href="{{ url_for('index_view') }}">MyAdvisor</a>
     <div class="landing-nav-actions">
       {% if user_logged_in %}
       <a class="btn-landing btn-landing-ghost" href="{{ app_home }}">Open app</a>
@@ -20,20 +17,22 @@
   </header>
 
   <main class="landing-hero">
-    <p class="landing-kicker">Coursework starter</p>
-    <h1 class="brand-wordmark">FastStarter</h1>
-    <p class="landing-lead">
-      A placeholder landing page for your COMP 3613 app.
-      Phase 5 theming replaces these colors, type, and copy with your brand.
-    </p>
-    <div class="landing-cta">
-      {% if user_logged_in %}
-      <a class="btn-landing btn-landing-primary" href="{{ app_home }}">Continue to app</a>
-      {% else %}
-      <a class="btn-landing btn-landing-primary" href="{{ url_for('register_view') }}">Create account</a>
-      <a class="btn-landing btn-landing-ghost" href="{{ url_for('login_view') }}">Sign in</a>
-      {% endif %}
-    </div>
+    <section>
+      <p class="landing-kicker">Academic planning</p>
+      <h1 class="brand-wordmark">Plan smarter. Graduate on time.</h1>
+      <p class="landing-lead">
+        MyAdvisor helps students track degree requirements, build semester plans, and submit course selections for advisor approval in one clear academic dashboard.
+      </p>
+      <div class="landing-cta">
+        {% if user_logged_in %}
+        <a class="btn-landing btn-landing-primary" href="{{ app_home }}">Continue to dashboard</a>
+        {% else %}
+        <a class="btn-landing btn-landing-primary" href="{{ url_for('register_view') }}">Create account</a>
+        <a class="btn-landing btn-landing-ghost" href="{{ url_for('login_view') }}">Sign in</a>
+        {% endif %}
+      </div>
+    </section>
+
   </main>
 
   <footer class="landing-foot">

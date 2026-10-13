@@ -1,0 +1,58 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam actorBorderColor #1B365D
+skinparam actorFontColor #1E232D
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam usecaseBorderColor #1B365D
+skinparam usecaseFontColor #1E232D
+skinparam rectangleBorderColor #1B365D
+skinparam rectangleBackgroundColor #F8FAFC
+skinparam arrowColor #1B365D
+
+actor "Student" as Student
+
+rectangle "MyAdvisor" {
+  usecase "Track Degree Audit & Plan Semester Courses" as Track_Degree_Audit_Plan_Semester_Courses
+  usecase "Save Draft Plan" as Save_Draft_Plan
+  usecase "View Degree Audit" as View_Degree_Audit
+  usecase "View Course Catalog" as View_Course_Catalog
+  usecase "Submit Course Selection Plan for Approval" as Submit_Course_Selection_Plan_for_Approval
+  usecase "Validate Plan Constraints" as Validate_Plan_Constraints
+  usecase "Review and Approve Course Selection Plan" as Review_and_Approve_Course_Selection_Plan
+  usecase "Fetch Student Progress History" as Fetch_Student_Progress_History
+  usecase "Add Advising Notes" as Add_Advising_Notes
+  usecase "Request Plan Revisions" as Request_Plan_Revisions
+}
+
+actor "Advisor" as Advisor
+
+Student --> Track_Degree_Audit_Plan_Semester_Courses
+Track_Degree_Audit_Plan_Semester_Courses ..> View_Degree_Audit : <<include>>
+Track_Degree_Audit_Plan_Semester_Courses ..> View_Course_Catalog : <<include>>
+Track_Degree_Audit_Plan_Semester_Courses ..> Save_Draft_Plan : <<extend>>
+Student --> Save_Draft_Plan
+Save_Draft_Plan ..> Track_Degree_Audit_Plan_Semester_Courses : <<extend>>
+Student --> View_Degree_Audit
+View_Degree_Audit <-- Advisor
+Student --> View_Course_Catalog
+View_Course_Catalog <-- Advisor
+Student --> Submit_Course_Selection_Plan_for_Approval
+Submit_Course_Selection_Plan_for_Approval ..> Save_Draft_Plan : <<include>>
+Submit_Course_Selection_Plan_for_Approval ..> Validate_Plan_Constraints : <<include>>
+Submit_Course_Selection_Plan_for_Approval ..> View_Degree_Audit : <<include>>
+Submit_Course_Selection_Plan_for_Approval ..> View_Course_Catalog : <<include>>
+Student --> Validate_Plan_Constraints
+Review_and_Approve_Course_Selection_Plan <-- Advisor
+Review_and_Approve_Course_Selection_Plan ..> Fetch_Student_Progress_History : <<include>>
+Review_and_Approve_Course_Selection_Plan ..> View_Degree_Audit : <<include>>
+Review_and_Approve_Course_Selection_Plan ..> View_Course_Catalog : <<include>>
+Review_and_Approve_Course_Selection_Plan ..> Add_Advising_Notes : <<extend>>
+Review_and_Approve_Course_Selection_Plan ..> Request_Plan_Revisions : <<extend>>
+Fetch_Student_Progress_History <-- Advisor
+Add_Advising_Notes <-- Advisor
+Add_Advising_Notes ..> Review_and_Approve_Course_Selection_Plan : <<extend>>
+Request_Plan_Revisions <-- Advisor
+Request_Plan_Revisions ..> Review_and_Approve_Course_Selection_Plan : <<extend>>
+
+@enduml

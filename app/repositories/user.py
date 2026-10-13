@@ -1,11 +1,18 @@
 from sqlmodel import Session, select, func
 from app.models.user import UserBase, User
+from app.models.student import Student
 from typing import Optional, Tuple
 from app.utilities.pagination import Pagination
 from app.schemas.user import UserUpdate
 import logging
+from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
+
+
+class DuplicateAccountError(Exception):
+    pass
+
 
 class UserRepository:
     def __init__(self, db: Session):
@@ -21,6 +28,47 @@ class UserRepository:
         except Exception as e:
             logger.error(f"An error occurred while saving user: {e}")
             self.db.rollback()
+            raise
+
+    def create_student_account(
+        self,
+        user_data: UserBase,
+        *,
+        student_id: str,
+        first_name: str,
+        last_name: str,
+        degree_program_id: int,
+    ) -> User:
+        from app.models.degree_program import DegreeProgram
+
+        if self.db.get(DegreeProgram, degree_program_id) is None:
+            raise ValueError("The selected degree program does not exist.")
+
+        try:
+            user_db = User.model_validate(user_data)
+            self.db.add(user_db)
+            self.db.flush()
+            student = Student(
+                user_id=user_db.id,
+                student_id=student_id,
+                first_name=first_name,
+                last_name=last_name,
+                email=user_db.email,
+                degree_program_id=degree_program_id,
+            )
+            self.db.add(student)
+            self.db.commit()
+            self.db.refresh(user_db)
+            return user_db
+        except IntegrityError as exc:
+            self.db.rollback()
+            logger.info("Student registration conflicted with an existing record.")
+            raise DuplicateAccountError(
+                "Username, email, or student ID already exists."
+            ) from exc
+        except Exception as exc:
+            self.db.rollback()
+            logger.error("An error occurred while creating student account: %s", exc)
             raise
 
     def search_users(self, query: str, page:int=1, limit:int=10) -> Tuple[list[User], Pagination]:

@@ -5,7 +5,7 @@
 <div class="auth-shell">
   <div class="auth-panel">
     <a class="auth-back" href="{{ url_for('index_view') }}">← Home</a>
-    <div class="brand-wordmark">FastStarter</div>
+    <div class="brand-wordmark">MyAdvisor</div>
     <p class="auth-tagline">Create an account</p>
 
     <form method="POST" action="{{ url_for('register_view') }}">
@@ -18,11 +18,37 @@
         <input class="form-control" type="email" id="email" name="email" required>
       </div>
       <div class="mb-3">
+        <label class="form-label" for="student_id">Student ID</label>
+        <input class="form-control" type="text" id="student_id" name="student_id" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="first_name">First name</label>
+        <input class="form-control" type="text" id="first_name" name="first_name" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="last_name">Last name</label>
+        <input class="form-control" type="text" id="last_name" name="last_name" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="degree_program_id">Degree program</label>
+        <select class="form-select" id="degree_program_id" name="degree_program_id" required>
+          {% if not degree_programs %}
+          <option value="" selected disabled>No degree programs are configured</option>
+          {% endif %}
+          {% for program in degree_programs %}
+          <option value="{{ program.id }}">{{ program.name }} ({{ program.code }})</option>
+          {% endfor %}
+        </select>
+        {% if not degree_programs %}
+        <small class="text-danger">Run the demo seed command before registering.</small>
+        {% endif %}
+      </div>
+      <div class="mb-3">
         <label class="form-label" for="password">Password</label>
         <input class="form-control" type="password" id="password" name="password" required>
       </div>
       <div class="d-grid gap-2 mb-3">
-        <button class="btn btn-primary btn-lg" type="submit">Register</button>
+        <button class="btn btn-primary btn-lg" type="submit" {% if not degree_programs %}disabled{% endif %}>Register</button>
         <a class="btn btn-outline-secondary" href="{{ url_for('login_view') }}">Back to sign in</a>
       </div>
 
