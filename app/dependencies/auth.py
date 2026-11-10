@@ -13,7 +13,14 @@ async def get_current_user(request:Request, db:SessionDep)->User:
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    token = request.cookies.get("access_token")
+    # Browser pages send the JWT as a cookie; API clients (Postman, mobile)
+    # send it as "Authorization: Bearer <token>".
+    token = None
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.lower().startswith("bearer "):
+        token = auth_header[7:].strip() or None
+    if token is None:
+        token = request.cookies.get("access_token")
 
     if token is None:
         raise credentials_exception
@@ -53,3 +60,29 @@ async def is_admin_dep(user: AuthDep):
     return user
 
 AdminDep = Annotated[User, Depends(is_admin_dep)]
+
+
+# ---------------------------------------------------------------------------
+# Role-based authorization for the REST API.
+# 401 = not logged in (no/invalid token); 403 = logged in but wrong role.
+# ---------------------------------------------------------------------------
+STUDENT_ROLE = "regular_user"
+ADVISOR_ROLE = "advisor"
+ADMIN_ROLE = "admin"
+
+
+def require_role(*roles: str):
+    async def role_checker(user: AuthDep) -> User:
+        if user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this resource.",
+            )
+        return user
+
+    return role_checker
+
+
+StudentUserDep = Annotated[User, Depends(require_role(STUDENT_ROLE))]
+AdvisorUserDep = Annotated[User, Depends(require_role(ADVISOR_ROLE))]
+AdminUserDep = Annotated[User, Depends(require_role(ADMIN_ROLE))]

@@ -24,4 +24,5 @@ from . import (
     users,
     logout,
     server_config,
+    api,
 )
