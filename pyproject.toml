@@ -16,6 +16,12 @@ dependencies = []
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "unit: isolated tests of one module with mocked dependencies",
+    "integration: HTTP-level tests through the whole app with a test database",
+]
 
 [tool.setuptools]
 packages = ["app"]
