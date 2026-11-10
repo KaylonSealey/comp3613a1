@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "bob",
+      "password": "bobpass"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test("Returns a bearer token", () => { pm.expect(body.access_token).to.be.a("string").and.not.empty; pm.expect(body.token_type).to.eql("bearer"); });
+      pm.test("Role is regular_user", () => pm.expect(body.role).to.eql("regular_user"));
+      pm.collectionVariables.set("studentToken", body.access_token);
+    language: text/javascript
+order: 1000

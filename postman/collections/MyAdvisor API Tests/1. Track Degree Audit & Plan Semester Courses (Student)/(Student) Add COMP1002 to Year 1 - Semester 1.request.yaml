@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/plan/courses"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "course_id": {{course_COMP1002}},
+      "academic_term": "2026/27",
+      "placement": "Year 1 - Semester 1",
+      "plan_length": 3
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", () => pm.response.to.have.status(201));
+      const item = pm.response.json();
+      pm.test("COMP1002 placed in Year 1 - Semester 1", () => { pm.expect(item.course.code).to.eql("COMP1002"); pm.expect(item.placement).to.eql("Year 1 - Semester 1"); });
+    language: text/javascript
+order: 8000

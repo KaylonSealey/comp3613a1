@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/audit"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      const audit = pm.response.json();
+      pm.test("15 of 27 credits completed (56%)", () => { pm.expect(audit.total_completed_credits).to.eql(15); pm.expect(audit.total_required_credits).to.eql(27); pm.expect(audit.progress_percent).to.eql(56); });
+      pm.test("Has requirement categories", () => pm.expect(audit.categories.map(c => c.name)).to.include.members(["Core", "Major", "Math"]));
+    language: text/javascript
+order: 5000

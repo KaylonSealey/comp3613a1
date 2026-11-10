@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/plan"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "academic_term": "2026/27",
+      "notes": "Please check my electives."
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      pm.test("Plan is still a Draft", () => pm.expect(pm.response.json().status).to.eql("Draft"));
+    language: text/javascript
+order: 1000

@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/plan"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "academic_term": "2026/27",
+      "notes": "Too late"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: pm.test("Status code is 409", () => pm.response.to.have.status(409));
+    language: text/javascript
+order: 5000

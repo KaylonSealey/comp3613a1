@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/api/advisor/plans/{{planId}}"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{advisorToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test("Student profile is included", () => pm.expect(body.student.student_id).to.eql("1002450678"));
+      pm.test("Proposed courses are included", () => pm.expect(body.plan.courses.map(c => c.course.code)).to.include("COMP1002"));
+      pm.test("Degree audit is included", () => pm.expect(body.audit.progress_percent).to.eql(56));
+    language: text/javascript
+order: 2000

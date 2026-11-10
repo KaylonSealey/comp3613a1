@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/plan/courses"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "course_id": {{course_ELEC1002}},
+      "academic_term": "2026/27",
+      "placement": "Year 2 - Semester 1",
+      "plan_length": 3
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 409", () => pm.response.to.have.status(409));
+      pm.test("Error message is correct", () => pm.expect(pm.response.json().detail).to.eql("A semester cannot exceed 16 credits."));
+    language: text/javascript
+order: 20000

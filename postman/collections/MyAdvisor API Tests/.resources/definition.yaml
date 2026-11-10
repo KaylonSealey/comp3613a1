@@ -1,0 +1,60 @@
+$kind: collection
+description: |-
+  API tests for MyAdvisor (COMP 3613 A2).
+
+  Before each run: `python manage.py init` then `python manage.py run`. Run the whole collection in order with the Collection Runner (or `newman run postman/myadvisor.postman_collection.json`). The run approves the demo student's plan, so re-run `python manage.py init` before running again.
+variables:
+  - key: baseUrl
+    value: http://127.0.0.1:5000
+    disabled: false
+    secret: false
+  - key: studentToken
+    value: ""
+    disabled: false
+    secret: false
+  - key: advisorToken
+    value: ""
+    disabled: false
+    secret: false
+  - key: adminToken
+    value: ""
+    disabled: false
+    secret: false
+  - key: planId
+    value: ""
+    disabled: false
+    secret: false
+  - key: removablePlanCourseId
+    value: ""
+    disabled: false
+    secret: false
+  - key: bearer_token_0muu
+    secret: true
+    disabled: false
+  - key: course_COMP1001
+    value: ""
+    disabled: false
+  - key: course_COMP1002
+    value: ""
+    disabled: false
+  - key: course_COMP2001
+    value: ""
+    disabled: false
+  - key: course_COMP2002
+    value: ""
+    disabled: false
+  - key: course_ELEC1001
+    value: ""
+    disabled: false
+  - key: course_ELEC1002
+    value: ""
+    disabled: false
+  - key: course_MATH1001
+    value: ""
+    disabled: false
+  - key: course_SCI1001
+    value: ""
+    disabled: false
+  - key: course_WRIT1001
+    value: ""
+    disabled: false

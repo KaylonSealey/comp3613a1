@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/advisor/plans"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{advisorToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      pm.test("Approved plan left the queue", () => pm.expect(pm.response.json().map(p => p.plan_id)).to.not.include(pm.collectionVariables.get("planId")));
+    language: text/javascript
+order: 14000

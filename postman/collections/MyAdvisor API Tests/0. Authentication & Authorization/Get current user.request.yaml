@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/me"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test("Username is bob", () => pm.expect(body.username).to.eql("bob"));
+      pm.test("Password is not exposed", () => pm.expect(body).to.not.have.property("password"));
+    language: text/javascript
+order: 6000

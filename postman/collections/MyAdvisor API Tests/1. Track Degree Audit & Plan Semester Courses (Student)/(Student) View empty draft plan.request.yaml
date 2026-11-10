@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/plan?academic_term=2026/27"
+method: GET
+queryParams:
+  academic_term: 2026/27
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      const plan = pm.response.json();
+      pm.test("Plan is an empty Draft", () => { pm.expect(plan.status).to.eql("Draft"); pm.expect(plan.courses).to.be.empty; pm.expect(plan.total_credits).to.eql(0); });
+    language: text/javascript
+order: 7000

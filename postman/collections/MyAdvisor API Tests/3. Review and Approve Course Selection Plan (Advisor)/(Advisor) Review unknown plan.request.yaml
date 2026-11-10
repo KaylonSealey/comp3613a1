@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/advisor/plans/99999"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{advisorToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 404", () => pm.response.to.have.status(404));
+      pm.test("Error message is correct", () => pm.expect(pm.response.json().detail).to.eql("That plan is not assigned to this advisor."));
+    language: text/javascript
+order: 3000

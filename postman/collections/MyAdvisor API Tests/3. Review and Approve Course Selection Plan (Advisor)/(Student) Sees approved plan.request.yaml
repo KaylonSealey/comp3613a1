@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/plan?academic_term=2026/27"
+method: GET
+queryParams:
+  academic_term: 2026/27
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      const plan = pm.response.json();
+      pm.test("Plan is Approved with an approval time", () => { pm.expect(plan.status).to.eql("Approved"); pm.expect(plan.approved_at).to.not.be.null; });
+      pm.test("WRIT1001 is in the approved plan", () => pm.expect(plan.courses.map(c => c.course.code)).to.include("WRIT1001"));
+    language: text/javascript
+order: 13000

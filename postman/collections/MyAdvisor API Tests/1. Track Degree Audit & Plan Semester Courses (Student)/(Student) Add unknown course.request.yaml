@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/plan/courses"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "course_id": 99999,
+      "academic_term": "2026/27",
+      "placement": "Year 1 - Semester 1",
+      "plan_length": 3
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 404", () => pm.response.to.have.status(404));
+      pm.test("Error message is correct", () => pm.expect(pm.response.json().detail).to.eql("The selected course does not exist."));
+    language: text/javascript
+order: 10000

@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/api/advisor/plans"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{advisorToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      const queue = pm.response.json();
+      const entry = queue.find(p => p.plan_id === pm.collectionVariables.get("planId"));
+      pm.test("Submitted plan is in the queue", () => pm.expect(entry).to.not.be.undefined);
+      pm.test("Shows student John Doe, Pending Review", () => { pm.expect(entry.student_name).to.eql("John Doe"); pm.expect(entry.status).to.eql("Pending Review"); });
+    language: text/javascript
+order: 1000

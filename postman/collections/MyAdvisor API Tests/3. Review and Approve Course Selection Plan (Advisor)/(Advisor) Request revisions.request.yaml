@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/advisor/plans/{{planId}}/decision"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "decision": "request_revisions",
+      "notes": "Please add WRIT1001 to Year 1 - Semester 2."
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{advisorToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      pm.test("Status is Revision Requested", () => pm.expect(pm.response.json().status).to.eql("Revision Requested"));
+    language: text/javascript
+order: 7000

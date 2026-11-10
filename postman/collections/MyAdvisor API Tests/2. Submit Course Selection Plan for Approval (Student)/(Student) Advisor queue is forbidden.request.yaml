@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/advisor/plans"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 403", () => pm.response.to.have.status(403));
+      pm.test("Error message is correct", () => pm.expect(pm.response.json().detail).to.eql("You do not have permission to access this resource."));
+    language: text/javascript
+order: 7000

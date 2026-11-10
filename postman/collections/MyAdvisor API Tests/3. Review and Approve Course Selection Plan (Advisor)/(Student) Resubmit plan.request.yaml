@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/plan/submission"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "academic_term": "2026/27",
+      "notes": "Added WRIT1001."
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      pm.test("Plan is Pending Review again", () => pm.expect(pm.response.json().status).to.eql("Pending Review"));
+    language: text/javascript
+order: 10000

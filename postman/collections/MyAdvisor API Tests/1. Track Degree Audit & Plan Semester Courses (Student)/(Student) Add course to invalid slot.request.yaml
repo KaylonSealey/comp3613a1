@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/plan/courses"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "course_id": {{course_COMP2002}},
+      "academic_term": "2026/27",
+      "placement": "Year 9 - Semester 1",
+      "plan_length": 3
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 409", () => pm.response.to.have.status(409));
+      pm.test("Error message is correct", () => pm.expect(pm.response.json().detail).to.eql("Choose a valid year and term destination."));
+    language: text/javascript
+order: 11000

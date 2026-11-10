@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/advisor/plans/{{planId}}/decision"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "decision": "approve",
+      "notes": "Well planned."
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{advisorToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      pm.test("Status is Approved", () => pm.expect(pm.response.json().status).to.eql("Approved"));
+    language: text/javascript
+order: 11000

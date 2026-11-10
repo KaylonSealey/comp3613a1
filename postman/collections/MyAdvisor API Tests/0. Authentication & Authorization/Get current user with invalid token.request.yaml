@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/me"
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: beforeRequest
+    code: 'pm.request.headers.upsert({ key: "Authorization", value: "{{bearer_token_0muu}}" });'
+    language: text/javascript
+  - type: afterResponse
+    code: pm.test("Status code is 401", () => pm.response.to.have.status(401));
+    language: text/javascript
+order: 8000

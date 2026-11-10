@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/plan/courses/{{removablePlanCourseId}}?academic_term=2026/27"
+method: DELETE
+queryParams:
+  academic_term: 2026/27
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: pm.test("Status code is 204", () => pm.response.to.have.status(204));
+    language: text/javascript
+order: 13000

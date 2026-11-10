@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/advisor/plans/{{planId}}/decision"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "decision": "approve",
+      "notes": ""
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{advisorToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 409", () => pm.response.to.have.status(409));
+      pm.test("Error message is correct", () => pm.expect(pm.response.json().detail).to.eql("Only plans pending review can receive an advisor decision."));
+    language: text/javascript
+order: 12000

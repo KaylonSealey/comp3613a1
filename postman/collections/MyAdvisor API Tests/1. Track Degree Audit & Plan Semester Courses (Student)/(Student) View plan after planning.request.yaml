@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/plan?academic_term=2026/27"
+method: GET
+queryParams:
+  academic_term: 2026/27
+auth:
+  type: bearer
+  credentials:
+    token: "{{studentToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => pm.response.to.have.status(200));
+      const plan = pm.response.json();
+      pm.test("Plan has 6 courses and 18 credits", () => { pm.expect(plan.courses).to.have.lengthOf(6); pm.expect(plan.total_credits).to.eql(18); });
+      pm.test("COMP2002 was removed", () => pm.expect(plan.courses.map(c => c.course.code)).to.not.include("COMP2002"));
+    language: text/javascript
+order: 21000
