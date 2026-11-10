@@ -18,6 +18,9 @@ dependencies = []
 asyncio_mode = "auto"
 pythonpath = ["."]
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+]
 markers = [
     "unit: isolated tests of one module with mocked dependencies",
     "integration: HTTP-level tests through the whole app with a test database",
